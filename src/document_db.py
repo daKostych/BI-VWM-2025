@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import nltk
-from collections import defaultdict
+from collections import defaultdict, Counter
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer, WordNetLemmatizer
@@ -80,21 +80,17 @@ class DocumentsDB:
     def __calculate_helpers(self):
         """Computes word frequency, document frequency (df), and max frequency (f) for TF-IDF calculation."""
         for i, document in enumerate(self.preprocessed_documents):
-            unique_words = set(document)
-            word_freq = defaultdict(int)
+            counter = Counter(document)
+            self.document_word_freq[i] = counter # Store word frequency for the document
+            unique_words = counter.keys()
 
-            for word in document:
-                if word in unique_words:
-                    self.idf_document_freq[word] += 1 # Count in how many documents the word appears (df)
-                    unique_words.remove(word)
-                word_freq[word] += 1 # Count word occurrences in the current document
+            # Count in how many documents the word appears (df)
+            for word in unique_words:
+                self.idf_document_freq[word] += 1
 
             # Track max frequency per word
-            for word, freq in word_freq.items():
-                self.word_max_f[word] = max(word_freq.get(word, 0), freq)
-
-            # Store word frequency for the document
-            self.document_word_freq[i] = word_freq
+            for word, freq in counter.items():
+                self.word_max_f[word] = max(self.word_max_f.get(word, 0), freq)
 
     def __calculate_tfidf(self, document_id, word):
         """Calculates the TF-IDF score for a given word in a specific document."""
@@ -111,10 +107,11 @@ class DocumentsDB:
     def __build_tfidf_matrix(self):
         """Constructs the TF-IDF matrix where rows represent documents and columns represent words in the vocabulary."""
         self.tfidf_matrix = np.zeros((len(self.preprocessed_documents), len(self.vocabulary)))
+        word_to_index = {word: index for index, word in enumerate(self.vocabulary)}
 
         for row, document in enumerate(self.preprocessed_documents):
             for word in document:
-                col = self.vocabulary.index(word)
+                col = word_to_index[word]
                 self.tfidf_matrix[row, col] = self.__calculate_tfidf(row, word)
 
     # TODO
