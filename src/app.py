@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 import requests
 from bs4 import BeautifulSoup
 from document_db import DocumentsDB
+from config import BASE_DIR
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -14,9 +15,10 @@ templates = Jinja2Templates(
     directory="/home/senyaaa/Work/bi-vwm.21/src/templates"
 )
 
+path = BASE_DIR / 'datasets' / 'pickled_data_2000.pkl'
 # Initialize document database
 db = DocumentsDB(
-    data_path="/home/senyaaa/Work/bi-vwm.21/src/pickled_data_2000.pkl",
+    data_path=path,
     load_pickled_data=True
 )
 

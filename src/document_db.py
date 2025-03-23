@@ -19,7 +19,7 @@ nltk.download('wordnet')
 
 class DocumentsDB:
     def __init__(self, data_path=DATA_PATH, load_pickled_data=False, use_inverted_index=False):
-        if load_pickled_data: # to not calculate tfidf everytime, just unpickle data
+        if load_pickled_data:  # to not calculate tfidf everytime, just unpickle data
             print("Loading data from pickle file...")
             self.load_pickled_data(data_path)
             self.__update_memory_usage()
@@ -65,13 +65,13 @@ class DocumentsDB:
         self.__calculate_helpers()
         print("Building tfidf matrix...")
         self.__build_tfidf_matrix()
-        print("Builded tfidf matrix...")
+        print("Built tfidf matrix...")
         self.speed_tester.stop(OperationType.TFIDF_MATRIX_BUILD)
 
         self.speed_tester.start()
         print("Building inverted index...")
         self.__build_inverted_index()
-        print("Builded inverted index...")
+        print("Built inverted index...")
         self.speed_tester.stop(OperationType.INVERTED_INDEX_BUILD)
 
         self.__update_memory_usage()
@@ -146,17 +146,19 @@ class DocumentsDB:
                 self.tfidf_matrix[row, col] = tf_idf_score
 
         self.document_norms = {doc_index: np.linalg.norm(doc_vector) for doc_index, doc_vector in
-                               enumerate(self.tfidf_matrix)} # precalculate norms
+                               enumerate(self.tfidf_matrix)}  # precalculate norms
 
     # TODO
     def __build_inverted_index(self):
         self.inverted_index = defaultdict(list)
+        self.cleaned_queries = defaultdict(list)
 
         # Create inverted index with (document_id, tfidf score for current document and term)
         for doc_id, document_vector in enumerate(self.tfidf_matrix):
             non_zero_indices = np.nonzero(document_vector)[0]
             for index in non_zero_indices:
                 self.inverted_index[index.item()].append((doc_id, self.tfidf_matrix[doc_id, index]))
+                self.cleaned_queries[doc_id].append((index, self.tfidf_matrix[doc_id, index]))
 
         # Sort the postings lists by tf-idf score in descending order
         for word in self.inverted_index:
@@ -171,21 +173,24 @@ class DocumentsDB:
             inverted_index_size += len(self.inverted_index[word]) * (
                     np.dtype('int').itemsize + np.dtype('float64').itemsize)
 
+        for term_index, documents in self.cleaned_queries.items():
+            inverted_index_size += len(documents) * (np.dtype('int').itemsize + np.dtype('float64').itemsize)
+
+        inverted_index_size += len(self.document_norms) * np.dtype('float64').itemsize
         self.inverted_index_nbytes = inverted_index_size
 
     # TODO
     def __get_similar_documents_inverted_index(self, document_id, n, print_results=False):
         """Retrieves the top-N most similar documents using inverted index search."""
-        query_vector = self.tfidf_matrix[document_id]
+        query_vector = self.cleaned_queries[document_id]
         query_norm = self.document_norms[document_id]
-        non_zero_indices = np.nonzero(query_vector)[0] # For even faster time, iterate through non zero values only
         scores = defaultdict(float)
 
         # Iterate through non null terms and get scores for each document with inner product
-        for indices in non_zero_indices:
-            for doc_id, doc_tfidf in self.inverted_index[indices]:
+        for index, tfidf in query_vector:
+            for doc_id, doc_tfidf in self.inverted_index[index]:
                 if doc_id != document_id:
-                    scores[doc_id] += query_vector[indices] * doc_tfidf
+                    scores[doc_id] += tfidf * doc_tfidf
 
         for doc_id in scores:
             scores[doc_id] /= (query_norm * self.document_norms[doc_id])
@@ -239,7 +244,8 @@ class DocumentsDB:
             'documents_dict': self.documents_dict,
             'vocabulary': self.vocabulary,
             'document_norms': self.document_norms,
-            'inverted_index': self.inverted_index
+            'inverted_index': self.inverted_index,
+            'cleaned_queries': self.cleaned_queries,
         }
         from config import BASE_DIR
         path = BASE_DIR / f"pickled_data_{len(self.full_documents)}.pkl"
@@ -256,3 +262,4 @@ class DocumentsDB:
         self.documents_dict = data['documents_dict']
         self.document_norms = data['document_norms']
         self.inverted_index = data['inverted_index']
+        self.cleaned_queries = data['cleaned_queries']
