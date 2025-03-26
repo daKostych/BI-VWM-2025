@@ -8,8 +8,11 @@ from fastapi.templating import Jinja2Templates
 import requests
 from bs4 import BeautifulSoup
 from document_db import DocumentsDB
-from src.config import BASE_DIR
+#from src.config import BASE_DIR
 
+from pathlib import Path
+
+BASE_DIR = Path().resolve()
 
 # Initialize FastAPI app
 app = FastAPI()

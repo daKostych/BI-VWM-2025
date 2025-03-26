@@ -8,9 +8,15 @@ from collections import defaultdict, Counter
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer, WordNetLemmatizer
-from src.config import DATA_PATH
+#from src.config import DATA_PATH
 from src.helpers import calculate_cosine_similarity
 from src.speed_tester import SpeedTester, OperationType
+
+from pathlib import Path
+
+BASE_DIR = Path().resolve()
+
+DATA_PATH = BASE_DIR / "datasets" / "documents100.csv"
 
 nltk.download('stopwords')
 nltk.download('punkt_tab')
