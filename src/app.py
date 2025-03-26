@@ -16,8 +16,11 @@ BASE_DIR = Path().resolve()
 
 # Initialize FastAPI app
 app = FastAPI()
+
+templates_dir = BASE_DIR / "src" / "templates"
+
 templates = Jinja2Templates(
-    directory="/home/senyaaa/Work/bi-vwm.21/src/templates"
+    directory=templates_dir
 )
 
 path = BASE_DIR / 'datasets' / 'pickled_data_2000.pkl'

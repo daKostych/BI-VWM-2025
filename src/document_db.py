@@ -9,8 +9,8 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 #from src.config import DATA_PATH
-from src.helpers import calculate_cosine_similarity
-from src.speed_tester import SpeedTester, OperationType
+from helpers import calculate_cosine_similarity
+from speed_tester import SpeedTester, OperationType
 
 from pathlib import Path
 
