@@ -110,8 +110,8 @@
                 {% if similar_documents %}
                     <h2>Similar Documents</h2>
                     <ul>
-                        {% for doc in similar_documents %}
-                            <li><a href="/document/{{ doc }}">{{ doc }}</a></li>
+                        {% for doc, title in similar_documents %}
+                            <li><a href="/document/{{ doc }}">{{ title }}</a></li>
                         {% endfor %}
                     </ul>
                 {% else %}

@@ -1,5 +1,6 @@
 # Standard library imports
 import time
+import re
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
@@ -39,6 +40,7 @@ async def index(request: Request) -> HTMLResponse:
 async def document(request: Request, id_: int) -> HTMLResponse:
     """Return the page for a specific document including similar documents and performance metrics."""
     # Get Wikipedia ID from database
+    #document_internal_id = int(document_to_parse.split(",")[0][1:])
     wikipedia_id = db.documents_dict[id_][0]
 
     # Extract page ID from Wikipedia URL
@@ -63,6 +65,15 @@ async def document(request: Request, id_: int) -> HTMLResponse:
     db.use_inverted_index = False
 
     assert similar_documents == similar_documents2, "Different recommendations"
+
+    def extract_title(text: str) -> str:
+        """Extract title from document text by finding words until two consecutive spaces."""
+        match = re.search(r"^(.*?)(  |$)", text)  # Match until two consecutive spaces or end of text
+        return match.group(1).strip() if match else "Untitled"
+
+    similar_documents = [
+        (doc_id, extract_title(db.documents_dict[doc_id][1])) for doc_id in similar_documents
+    ]
 
     return templates.TemplateResponse(
         "document.html",
