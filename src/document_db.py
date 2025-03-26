@@ -8,9 +8,9 @@ from collections import defaultdict, Counter
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer, WordNetLemmatizer
-from src.config import DATA_PATH
-from src.helpers import calculate_cosine_similarity
-from src.speed_tester import SpeedTester, OperationType
+from .config import DATA_PATH
+from .helpers import calculate_cosine_similarity
+from .speed_tester import SpeedTester, OperationType
 
 nltk.download('stopwords')
 nltk.download('punkt_tab')
