@@ -148,7 +148,6 @@ class DocumentsDB:
         self.document_norms = {doc_index: np.linalg.norm(doc_vector) for doc_index, doc_vector in
                                enumerate(self.tfidf_matrix)}  # precalculate norms
 
-    # TODO
     def __build_inverted_index(self):
         self.inverted_index = defaultdict(list)
         self.cleaned_queries = defaultdict(list)
@@ -179,7 +178,6 @@ class DocumentsDB:
         inverted_index_size += len(self.document_norms) * np.dtype('float64').itemsize
         self.inverted_index_nbytes = inverted_index_size
 
-    # TODO
     def __get_similar_documents_inverted_index(self, document_id, n, print_results=False):
         """Retrieves the top-N most similar documents using inverted index search."""
         query_vector = self.cleaned_queries[document_id]
@@ -196,7 +194,7 @@ class DocumentsDB:
             scores[doc_id] /= (query_norm * self.document_norms[doc_id])
 
         sorted_documents = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:n]
-        return [doc_id for doc_id, _ in sorted_documents]
+        return sorted_documents
 
     def __get_similar_documents_linear(self, document_id, n, print_results):
         """Retrieves the top-N most similar documents using TF-IDF matrix."""
@@ -212,7 +210,7 @@ class DocumentsDB:
             print(cosine_values)
 
         # Extract document IDs
-        most_similar_documents = [doc[1] for doc in sorted(documents_id_similarity, reverse=True)[:n]]
+        most_similar_documents = [(doc[1], doc[0]) for doc in sorted(documents_id_similarity, reverse=True)[:n]]
         return most_similar_documents
 
     def get_document_text(self, document_id):

@@ -68,7 +68,8 @@ async def document(request: Request, id_: int) -> HTMLResponse:
     inverted_search_speed = db.get_speed_statistics().search_speed
     db.use_inverted_index = False
 
-    assert similar_documents == similar_documents2, "Different recommendations"
+    for doc1, doc2 in zip(similar_documents, similar_documents2):
+        assert doc1[0] == doc2[0], 'Different recommendations'
 
     def extract_title(text: str) -> str:
         """Extract title from document text by finding words until two consecutive spaces."""
@@ -76,7 +77,7 @@ async def document(request: Request, id_: int) -> HTMLResponse:
         return match.group(1).strip() if match else "Untitled"
 
     similar_documents = [
-        (doc_id, extract_title(db.documents_dict[doc_id][1])) for doc_id in similar_documents
+        (doc_id, extract_title(db.documents_dict[doc_id][1]), similarity_score) for doc_id, similarity_score in similar_documents
     ]
 
     return templates.TemplateResponse(
