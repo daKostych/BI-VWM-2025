@@ -2,4 +2,6 @@ from pathlib import Path
 
 BASE_DIR = Path().resolve()
 
-DATA_PATH = BASE_DIR / "datasets" / "documents100.csv"
+ROOT_DIR = BASE_DIR.parent
+
+DATA_PATH = ROOT_DIR / "datasets" / "documents100.csv"

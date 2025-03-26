@@ -47,19 +47,18 @@
             margin-top: 0;
             color: #007bff;
         }
-        .similar-documents ul {
-            list-style: none;
-            padding: 0;
+        .table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        .similar-documents li {
-            margin: 10px 0;
+        .table th, .table td {
             padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            transition: background-color 0.3s;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
-        .similar-documents li:hover {
-            background-color: #e9ecef;
+        .table th {
+            background-color: #007bff;
+            color: white;
         }
         .home-button {
             background-color: #007bff;
@@ -96,7 +95,7 @@
             <h4>Performance Metrics:</h4>
             <p>Time to fetch Wikipedia page: {{ time_to_fetch_wikipedia }} seconds</p>
             <p>Time to find similar documents linearly: {{ similar_documents_speed }} seconds</p>
-             <p>Time to find similar documents with inverted index: {{ similar_documents_speed_inverted }} seconds</p>
+            <p>Time to find similar documents with inverted index: {{ similar_documents_speed_inverted }} seconds</p>
         </div>
 
         <div class="document-container">
@@ -109,11 +108,22 @@
             <div class="similar-documents">
                 {% if similar_documents %}
                     <h2>Similar Documents</h2>
-                    <ul>
-                        {% for doc, title in similar_documents %}
-                            <li><a href="/document/{{ doc }}">{{ title }}</a></li>
-                        {% endfor %}
-                    </ul>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Document</th>
+                                <th>Similarity Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc, title, similarity_score in similar_documents %}
+                                <tr>
+                                    <td><a href="/document/{{ doc }}">{{ title }}</a></td>
+                                    <td>{{ "%.5f"|format(similarity_score) }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 {% else %}
                     <p>No similar documents found.</p>
                 {% endif %}
